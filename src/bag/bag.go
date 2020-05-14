@@ -19,6 +19,9 @@ const BLUE = 3
 //YELLOW color
 const YELLOW = 4
 
+//WILDCARD color
+const WILDCARD = 0
+
 //Token struct for representing the tuple Value and Color
 type Token struct {
 
@@ -67,6 +70,10 @@ func (b *Bag) Extract(n int) ([]Token, error) {
 		return arr, errors.New("Negative integer for extracting from bag")
 	} else if n > len(b.Bag) {
 		n = len(b.Bag)
+	}
+
+	if n == 0 {
+		return arr, nil
 	}
 
 	for i := 0; i < n; i++ {
