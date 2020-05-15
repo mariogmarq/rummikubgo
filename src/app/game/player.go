@@ -27,3 +27,10 @@ func (p *Player) OrderHand() {
 		}
 	}
 }
+
+//Print player hand
+func (p Player) Print() {
+	for _, v := range p.Tokens {
+		v.Print()
+	}
+}

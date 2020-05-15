@@ -67,3 +67,10 @@ func (m *Move) FindScore() {
 	}
 	m.Score = sum
 }
+
+//Print move
+func (m Move) Print() {
+	for _, v := range m.Tokens {
+		v.Print()
+	}
+}

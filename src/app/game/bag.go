@@ -2,7 +2,10 @@ package game
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
+
+	. "github.com/logrusorgru/aurora"
 )
 
 //Token colors
@@ -83,4 +86,20 @@ func (b *Bag) Extract(n int) ([]Token, error) {
 	b.Bag = b.Bag[n+1 : len(b.Bag)]
 
 	return arr, nil
+}
+
+//Print a token
+func (t Token) Print() {
+	if t.Color == RED {
+		fmt.Printf("%d", Red(t.Value))
+	} else if t.Color == BLUE {
+		fmt.Printf("%d", Blue(t.Value))
+	} else if t.Color == BLACK {
+		fmt.Printf("%d", Black(t.Value))
+	} else if t.Color == YELLOW {
+		fmt.Printf("%d", BrightYellow(t.Value))
+	} else {
+		fmt.Printf("%d", BrightMagenta(t.Value))
+	}
+
 }
