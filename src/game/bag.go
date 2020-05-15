@@ -39,7 +39,7 @@ type Bag struct {
 
 //CreateBag from a random
 func CreateBag() Bag {
-	var bag Bag
+	bag := Bag{Bag: nil}
 	var token Token
 
 	for i := 0; i < 4; i++ {

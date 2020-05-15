@@ -14,4 +14,4 @@
 - [ ] Added the ability to do a movement
 - [x] Added player that can hold the tokens
 - [x] Added bag from where you can extract the tokens
-
+- [ ] Possibility to use keyboard intuitive control
