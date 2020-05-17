@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	. "github.com/logrusorgru/aurora"
+	"github.com/logrusorgru/aurora"
 )
 
 //Token colors
@@ -33,6 +33,9 @@ type Token struct {
 
 	//Color of the token
 	Color int
+
+	//Selected in the player
+	Selected bool
 }
 
 //Bag struct for representing an array of 106 Tokens
@@ -48,7 +51,7 @@ func CreateBag() Bag {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 13; j++ {
 			for k := 0; k < 2; k++ {
-				token = Token{Value: j + 1, Color: i + 1}
+				token = Token{Value: j + 1, Color: i + 1, Selected: false}
 				bag.Bag = append(bag.Bag, token)
 			}
 		}
@@ -66,7 +69,7 @@ func CreateBag() Bag {
 	return bag
 }
 
-//Extract n Toekn from bag b
+//Extract n Token from bag b, error if n < 0
 func (b *Bag) Extract(n int) ([]Token, error) {
 	var arr []Token
 	if n < 0 {
@@ -90,16 +93,32 @@ func (b *Bag) Extract(n int) ([]Token, error) {
 
 //Print a token
 func (t Token) Print() {
-	if t.Color == RED {
-		fmt.Printf("%d", Red(t.Value))
-	} else if t.Color == BLUE {
-		fmt.Printf("%d", Blue(t.Value))
-	} else if t.Color == BLACK {
-		fmt.Printf("%d", Black(t.Value))
-	} else if t.Color == YELLOW {
-		fmt.Printf("%d", BrightYellow(t.Value))
-	} else {
-		fmt.Printf("%d", BrightMagenta(t.Value))
+	switch t.Selected {
+	case false:
+		switch t.Color {
+		case RED:
+			fmt.Printf("%d", aurora.Red(t.Value))
+		case BLUE:
+			fmt.Printf("%d", aurora.Blue(t.Value))
+		case BLACK:
+			fmt.Printf("%d", aurora.Black(t.Value))
+		case YELLOW:
+			fmt.Printf("%d", aurora.BrightYellow(t.Value))
+		default:
+			fmt.Printf("%d", aurora.BrightMagenta(t.Value))
+		}
+	case true:
+		switch t.Color {
+		case RED:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.Red(t.Value)))
+		case BLUE:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.Blue(t.Value)))
+		case BLACK:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BrightBlack(t.Value)))
+		case YELLOW:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BrightYellow(t.Value)))
+		default:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BrightMagenta(t.Value)))
+		}
 	}
-
 }
