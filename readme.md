@@ -1,6 +1,6 @@
 ### Information
-About the game: https://en.wikipedia.org/wiki/Rummikub
-The project was created in order to learn about the Go language and basic net usage
+- About the game: https://en.wikipedia.org/wiki/Rummikub
+- The project was created in order to learn about the Go language and basic net usage
 
 
 ### Features 
