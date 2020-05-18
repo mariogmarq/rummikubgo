@@ -3,6 +3,7 @@ package main
 import (
 	"./game"
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 )
@@ -10,6 +11,8 @@ import (
 //bytes for moving
 var left = []byte{'a'}
 var right = []byte{'d'}
+var enter = []byte{10}
+var space = []byte{32}
 
 func lookError(err error) {
 	if err != nil {
@@ -38,6 +41,7 @@ func main() {
 	//Create game assets
 	bag := game.CreateBag()
 	player := game.CreatePlayer()
+	mov := game.Move{Score: 0}
 
 	//Fill player hand
 	Tokens, err := bag.Extract(14)
@@ -55,12 +59,18 @@ func main() {
 	//game loop
 	for {
 		player.Print()
+		fmt.Println(mov.Score)
 		os.Stdin.Read(b)
 		clear()
 		if equal(b, right) {
 			player.ChangeSelected(true)
 		} else if equal(b, left) {
 			player.ChangeSelected(false)
+		} else if equal(b, space) {
+			player.SelectToken()
+		} else if equal(b, enter) {
+			mov = player.CreateMove()
+			mov.FindScore()
 		}
 	}
 }

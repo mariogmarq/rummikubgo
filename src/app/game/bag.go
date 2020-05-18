@@ -3,9 +3,8 @@ package game
 import (
 	"errors"
 	"fmt"
-	"math/rand"
-
 	"github.com/logrusorgru/aurora"
+	"math/rand"
 )
 
 //Token colors
@@ -35,7 +34,8 @@ type Token struct {
 	Color int
 
 	//Selected in the player
-	Selected bool
+	Selected int //0 no selected, 1 selected, 2 for move, 3 for selected and move
+
 }
 
 //Bag struct for representing an array of 106 Tokens
@@ -51,7 +51,7 @@ func CreateBag() Bag {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 13; j++ {
 			for k := 0; k < 2; k++ {
-				token = Token{Value: j + 1, Color: i + 1, Selected: false}
+				token = Token{Value: j + 1, Color: i + 1, Selected: 0}
 				bag.Bag = append(bag.Bag, token)
 			}
 		}
@@ -94,7 +94,7 @@ func (b *Bag) Extract(n int) ([]Token, error) {
 //Print a token
 func (t Token) Print() {
 	switch t.Selected {
-	case false:
+	case 0:
 		switch t.Color {
 		case RED:
 			fmt.Printf("%d", aurora.Red(t.Value))
@@ -107,7 +107,7 @@ func (t Token) Print() {
 		default:
 			fmt.Printf("%d", aurora.BrightMagenta(t.Value))
 		}
-	case true:
+	case 1:
 		switch t.Color {
 		case RED:
 			fmt.Printf("%d", aurora.SlowBlink(aurora.Red(t.Value)))
@@ -119,6 +119,32 @@ func (t Token) Print() {
 			fmt.Printf("%d", aurora.SlowBlink(aurora.BrightYellow(t.Value)))
 		default:
 			fmt.Printf("%d", aurora.SlowBlink(aurora.BrightMagenta(t.Value)))
+		}
+	case 2:
+		switch t.Color {
+		case RED:
+			fmt.Printf("%d", aurora.BgRed(t.Value))
+		case BLUE:
+			fmt.Printf("%d", aurora.BgBlue(t.Value))
+		case BLACK:
+			fmt.Printf("%d", aurora.BgBrightBlack(t.Value))
+		case YELLOW:
+			fmt.Printf("%d", aurora.BgBrightYellow(t.Value))
+		default:
+			fmt.Printf("%d", aurora.BgBrightMagenta(t.Value))
+		}
+	case 3:
+		switch t.Color {
+		case RED:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BgRed(t.Value)))
+		case BLUE:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BgBlue(t.Value)))
+		case BLACK:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BgBrightBlack(t.Value)))
+		case YELLOW:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BgBrightYellow(t.Value)))
+		default:
+			fmt.Printf("%d", aurora.SlowBlink(aurora.BgBrightMagenta(t.Value)))
 		}
 	}
 }

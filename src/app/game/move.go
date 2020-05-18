@@ -60,12 +60,13 @@ func (m Move) IsValid() bool {
 func (m *Move) FindScore() {
 	if !m.IsValid() {
 		m.Score = -1
+	} else {
+		sum := 0
+		for _, v := range m.Tokens {
+			sum += v.Value
+		}
+		m.Score = sum
 	}
-	sum := 0
-	for _, v := range m.Tokens {
-		sum += v.Value
-	}
-	m.Score = sum
 }
 
 //Print move

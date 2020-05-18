@@ -18,7 +18,7 @@ func CreatePlayer() Player {
 func (p *Player) AddToken(arr []Token) {
 	p.Tokens = append(p.Tokens, arr...)
 	p.OrderHand()
-	p.Tokens[0].Selected = true
+	p.Tokens[0].Selected = 1
 }
 
 //OrderHand player array
@@ -32,6 +32,17 @@ func (p *Player) OrderHand() {
 	}
 }
 
+//delete a position
+func (p *Player) delete(pos int) {
+	var arr []Token
+	for i, v := range p.Tokens {
+		if i != pos {
+			arr = append(arr, v)
+		}
+	}
+	p.Tokens = arr
+}
+
 //Print player hand
 func (p Player) Print() {
 	for _, v := range p.Tokens {
@@ -43,7 +54,7 @@ func (p Player) Print() {
 //FindSelected token position
 func (p Player) FindSelected() int {
 	for i, v := range p.Tokens {
-		if v.Selected {
+		if v.Selected == 1 || v.Selected == 3 {
 			return i
 		}
 	}
@@ -53,15 +64,59 @@ func (p Player) FindSelected() int {
 //ChangeSelected takes a bool, true right, false left
 func (p *Player) ChangeSelected(right bool) {
 	pos := p.FindSelected()
+	val1 := 0
+	val2 := 1
 	if pos != -1 {
 		if right {
 			if pos < len(p.Tokens)-1 {
-				p.Tokens[pos].Selected, p.Tokens[pos+1].Selected = false, true
+				if p.Tokens[pos+1].Selected == 2 {
+					val2 = 3
+				}
+				if p.Tokens[pos].Selected == 3 {
+					val1 = 2
+				}
+				p.Tokens[pos].Selected, p.Tokens[pos+1].Selected = val1, val2
 			}
 		} else {
 			if pos > 0 {
-				p.Tokens[pos].Selected, p.Tokens[pos-1].Selected = false, true
+				if p.Tokens[pos-1].Selected == 2 {
+					val2 = 3
+				}
+				if p.Tokens[pos].Selected == 3 {
+					val1 = 2
+				}
+				p.Tokens[pos].Selected, p.Tokens[pos-1].Selected = val1, val2
 			}
 		}
 	}
+}
+
+//SelectToken from hand
+func (p *Player) SelectToken() {
+	pos := p.FindSelected()
+	if p.Tokens[pos].Selected == 3 {
+		p.Tokens[pos].Selected = 1
+	} else {
+		p.Tokens[pos].Selected = 3
+	}
+}
+
+//CreateMove from hand
+func (p *Player) CreateMove() Move {
+	var pos []int
+	mov := Move{Score: 0}
+	for i := range p.Tokens {
+		if p.Tokens[i].Selected == 2 || p.Tokens[i].Selected == 3 {
+			pos = append(pos, i)
+		}
+	}
+	for _, v := range pos {
+		mov.Tokens = append(mov.Tokens, p.Tokens[v])
+	}
+
+	for i := 0; i < len(pos); i++ {
+		p.delete(pos[i] - i)
+	}
+
+	return mov
 }
