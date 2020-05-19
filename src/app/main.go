@@ -11,6 +11,9 @@ import (
 //bytes for moving
 var left = []byte{'a'}
 var right = []byte{'d'}
+var jumptotable = []byte{'w'}
+var jumptoplayer = []byte{'s'}
+var draw = []byte{'q'}
 var enter = []byte{10}
 var space = []byte{32}
 
@@ -42,6 +45,7 @@ func main() {
 	bag := game.CreateBag()
 	player := game.CreatePlayer()
 	mov := game.Move{Score: 0}
+	table := game.Table{}
 
 	//Fill player hand
 	Tokens, err := bag.Extract(14)
@@ -56,21 +60,39 @@ func main() {
 	//NOT MINE
 
 	var b []byte = make([]byte, 1)
+
 	//game loop
 	for {
+		table.Print()
 		player.Print()
 		fmt.Println(mov.Score)
 		os.Stdin.Read(b)
 		clear()
+
 		if equal(b, right) {
 			player.ChangeSelected(true)
+
 		} else if equal(b, left) {
 			player.ChangeSelected(false)
+
 		} else if equal(b, space) {
 			player.SelectToken()
+
 		} else if equal(b, enter) {
 			mov = player.CreateMove()
 			mov.FindScore()
+			if mov.Score != -1 {
+				player.RemoveMove(mov)
+				table.AddMove(mov)
+			}
+			player.ResetSelected()
+
+		} else if equal(b, draw) {
+			Tokens, err := bag.Extract(1)
+			lookError(err)
+			player.AddToken(Tokens)
+			player.ResetSelected()
 		}
+
 	}
 }

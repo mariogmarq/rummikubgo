@@ -114,9 +114,33 @@ func (p *Player) CreateMove() Move {
 		mov.Tokens = append(mov.Tokens, p.Tokens[v])
 	}
 
-	for i := 0; i < len(pos); i++ {
-		p.delete(pos[i] - i)
+	return mov
+}
+
+//SearchToken in hand and return position
+func (p Player) SearchToken(t Token) int {
+	for i, v := range p.Tokens {
+		if v == t {
+			return i
+		}
 	}
 
-	return mov
+	return -1
+}
+
+//RemoveMove from hand
+func (p *Player) RemoveMove(m Move) {
+	for _, v := range m.Tokens {
+		p.delete(p.SearchToken(v))
+	}
+}
+
+//ResetSelected config
+func (p *Player) ResetSelected() {
+	for i := range p.Tokens {
+		p.Tokens[i].Selected = 0
+	}
+	if len(p.Tokens) > 0 {
+		p.Tokens[0].Selected = 1
+	}
 }

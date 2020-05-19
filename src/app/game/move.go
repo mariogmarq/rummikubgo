@@ -1,5 +1,7 @@
 package game
 
+import "fmt"
+
 //Move struct for representing multiple tiles
 type Move struct {
 	Score  int
@@ -11,6 +13,7 @@ func (m Move) IsValid() bool {
 	if len(m.Tokens) < 3 {
 		return false
 	}
+	var iswildcard = 0
 
 	//is a series
 	var colors []int
@@ -21,15 +24,19 @@ func (m Move) IsValid() bool {
 		numbers = append(numbers, m.Tokens[i].Value)
 	}
 
+	for i := 0; numbers[i] == 0; i++ {
+		iswildcard = i + 1
+	}
+
 	for i, v := range numbers {
-		if numbers[0] != v && v != WILDCARD && i != 0 {
+		if numbers[iswildcard] != v && i != 0 {
 			isSeries = false
 		}
 	}
 
-	for i := 0; i < len(colors)-1; i++ {
+	for i := iswildcard; i < len(colors)-1; i++ {
 		for j := i + 1; j < len(colors); j++ {
-			if colors[i] == colors[j] && colors[i] != WILDCARD {
+			if colors[i] == colors[j] {
 				isSeries = false
 			}
 		}
@@ -41,15 +48,21 @@ func (m Move) IsValid() bool {
 
 	isStair := true
 
-	for i, v := range colors {
-		if colors[0] != v && v != WILDCARD && i != 0 {
+	for i := iswildcard; i < len(colors); i++ {
+		if colors[iswildcard] != colors[i] && i != iswildcard {
 			isStair = false
 		}
 	}
 
-	for i := 0; i < len(numbers)-1; i++ {
-		if numbers[i] != numbers[i+1] {
-			isStair = false
+	skipped := 0
+	for i := iswildcard; i < len(numbers)-1; i++ {
+		if numbers[i]+1+skipped != numbers[i+1] {
+			if skipped == iswildcard {
+				isStair = false
+			} else {
+				skipped++
+				i--
+			}
 		}
 	}
 
@@ -73,5 +86,6 @@ func (m *Move) FindScore() {
 func (m Move) Print() {
 	for _, v := range m.Tokens {
 		v.Print()
+		fmt.Printf("/")
 	}
 }
