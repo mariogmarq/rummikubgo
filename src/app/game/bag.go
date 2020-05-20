@@ -44,7 +44,7 @@ type Bag struct {
 }
 
 //CreateBag from a random
-func CreateBag() Bag {
+func CreateBag(r *rand.Rand) Bag {
 	bag := Bag{Bag: nil}
 	var token Token
 
@@ -62,7 +62,7 @@ func CreateBag() Bag {
 		bag.Bag = append(bag.Bag, token)
 	}
 
-	rand.Shuffle(len(bag.Bag), func(i, j int) {
+	r.Shuffle(len(bag.Bag), func(i, j int) {
 		bag.Bag[i], bag.Bag[j] = bag.Bag[j], bag.Bag[i]
 	})
 
