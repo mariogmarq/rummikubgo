@@ -89,3 +89,50 @@ func (m Move) Print() {
 		fmt.Printf("/")
 	}
 }
+
+//FindSelected inside move
+func (m Move) FindSelected() int {
+	for i, v := range m.Tokens {
+		if v.Selected == 1 || v.Selected == 3 {
+			return i
+		}
+	}
+	return -1
+}
+
+//ChangeSelected in move
+func (m *Move) ChangeSelected(right bool) {
+	pos := m.FindSelected()
+	val1 := 0
+	val2 := 1
+	if pos != -1 {
+		if right {
+			if pos < len(m.Tokens)-1 {
+				if m.Tokens[pos].Selected == 3 {
+					val1 = 2
+				}
+				if m.Tokens[pos+1].Selected == 2 {
+					val2 = 3
+				}
+				m.Tokens[pos].Selected, m.Tokens[pos+1].Selected = val1, val2
+			}
+		} else {
+			if pos > 0 {
+				if m.Tokens[pos].Selected == 3 {
+					val1 = 2
+				}
+				if m.Tokens[pos-1].Selected == 2 {
+					val2 = 3
+				}
+				m.Tokens[pos].Selected, m.Tokens[pos-1].Selected = val1, val2
+			}
+		}
+	}
+}
+
+//ResetSelected tokens
+func (m *Move) ResetSelected() {
+	for i := range m.Tokens {
+		m.Tokens[i].Selected = 0
+	}
+}

@@ -16,6 +16,7 @@ var jumptoplayer = []byte{'s'}
 var draw = []byte{'q'}
 var enter = []byte{10}
 var space = []byte{32}
+var commit = []byte{'e'}
 
 func lookError(err error) {
 	if err != nil {
@@ -42,15 +43,13 @@ func equal(a, b []byte) bool {
 func main() {
 	clear()
 	//Create game assets
-	bag := game.CreateBag()
-	player := game.CreatePlayer()
-	mov := game.Move{Score: 0}
-	table := game.Table{}
+	g := game.CreateGame(false)
+	mov := game.Move{}
 
 	//Fill player hand
-	Tokens, err := bag.Extract(14)
+	Tokens, err := g.Bag.Extract(14)
 	lookError(err)
-	player.AddToken(Tokens)
+	g.Players[0].AddToken(Tokens)
 
 	//NOT MINE
 	// disable input buffering
@@ -63,35 +62,35 @@ func main() {
 
 	//game loop
 	for {
-		table.Print()
-		player.Print()
+		g.Print()
 		fmt.Println(mov.Score)
 		os.Stdin.Read(b)
 		clear()
 
 		if equal(b, right) {
-			player.ChangeSelected(true)
+			g.ChangeSelected(true, 0)
 
 		} else if equal(b, left) {
-			player.ChangeSelected(false)
+			g.ChangeSelected(false, 0)
 
 		} else if equal(b, space) {
-			player.SelectToken()
+			g.SelectToken(0) //Cambiar
 
 		} else if equal(b, enter) {
-			mov = player.CreateMove()
-			mov.FindScore()
-			if mov.Score != -1 {
-				player.RemoveMove(mov)
-				table.AddMove(mov)
-			}
-			player.ResetSelected()
+			g.EndTurn()
 
 		} else if equal(b, draw) {
-			Tokens, err := bag.Extract(1)
+			Tokens, err := g.Bag.Extract(1)
 			lookError(err)
-			player.AddToken(Tokens)
-			player.ResetSelected()
+			g.Players[0].AddToken(Tokens)
+			g.Players[0].ResetSelected()
+		} else if equal(b, jumptotable) {
+			g.ChangeSection(true, 0)
+		} else if equal(b, jumptoplayer) {
+			g.ChangeSection(false, 0)
+		} else if equal(b, commit) {
+			mov = g.CreateMove(0)
+			g.Turn = append(g.Turn, mov)
 		}
 
 	}

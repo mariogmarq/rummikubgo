@@ -44,3 +44,58 @@ func (t Table) Print() {
 	}
 
 }
+
+//ChangeSelected Movement
+func (t *Table) ChangeSelected(right bool) {
+	pos := t.findselected()
+	val1 := 0
+	val2 := 1
+	if pos != -1 {
+		if right {
+			if t.matrix[pos].FindSelected() == len(t.matrix[pos].Tokens)-1 {
+				if pos < len(t.matrix)-1 {
+					if t.matrix[pos].Tokens[t.matrix[pos].FindSelected()].Selected == 3 {
+						val1 = 2
+					}
+					if t.matrix[pos+1].Tokens[0].Selected == 2 {
+						val2 = 3
+					}
+					t.matrix[pos].Tokens[t.matrix[pos].FindSelected()].Selected, t.matrix[pos+1].Tokens[0].Selected = val1, val2
+				}
+			} else {
+				t.matrix[pos].ChangeSelected(true)
+			}
+		} else {
+			if t.matrix[pos].FindSelected() == 0 {
+				if pos > 0 {
+					if t.matrix[pos].Tokens[0].Selected == 3 {
+						val1 = 2
+					}
+					if t.matrix[pos-1].Tokens[len(t.matrix[pos-1].Tokens)-1].Selected == 2 {
+						val2 = 3
+					}
+					t.matrix[pos].Tokens[0].Selected, t.matrix[pos-1].Tokens[len(t.matrix[pos-1].Tokens)-1].Selected = val1, val2
+				}
+			} else {
+				t.matrix[pos].ChangeSelected(false)
+			}
+		}
+	}
+}
+
+//findselected move
+func (t Table) findselected() int {
+	for i, v := range t.matrix {
+		if v.FindSelected() != -1 {
+			return i
+		}
+	}
+	return -1
+}
+
+//ResetSelected moves
+func (t *Table) ResetSelected() {
+	for i := range t.matrix {
+		t.matrix[i].ResetSelected()
+	}
+}
