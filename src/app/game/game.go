@@ -1,16 +1,9 @@
 package game
 
-import (
-	"math/rand"
-	"time"
-)
-
 //Game struct for zipping all other classes
 type Game struct {
 	Players []Player
 	Table   Table
-	Bag     Bag
-	Turn    []Move
 	playing int
 }
 
@@ -23,7 +16,6 @@ func (g Game) Print() {
 //CreateGame function
 func CreateGame(online bool) Game {
 	g := Game{}
-	g.Bag = CreateBag(rand.New(rand.NewSource(time.Now().UnixNano())))
 	if !online {
 		g.Players = append(g.Players, CreatePlayer())
 		g.playing = 1
@@ -31,31 +23,10 @@ func CreateGame(online bool) Game {
 	return g
 }
 
-//EndTurn of a player
-func (g *Game) EndTurn() {
-	isValid := g.Table.CheckTable()
-
-	if isValid {
-		for _, v := range g.Turn {
-			if !v.IsValid() {
-				isValid = false
-			}
-		}
-	}
-
-	if isValid {
-		for _, v := range g.Turn {
-			g.Table.AddMove(v)
-		}
-	}
-	g.ResetSelected()
-	g.Turn = nil
-}
-
 //ChangeSection for changing from player to table and viceversa
 func (g *Game) ChangeSection(up bool, p int) {
 	if up {
-		if len(g.Table.matrix) > 0 {
+		if len(g.Table.Matrix) > 0 {
 			pos := g.Players[p].FindSelected()
 			if pos != -1 {
 				if g.Players[p].Tokens[pos].Selected == 1 {
@@ -63,26 +34,26 @@ func (g *Game) ChangeSection(up bool, p int) {
 				} else {
 					g.Players[p].Tokens[pos].Selected = 2
 				}
-				if g.Table.matrix[0].Tokens[0].Selected == 0 {
-					g.Table.matrix[0].Tokens[0].Selected = 1
+				if g.Table.Matrix[0].Tokens[0].Selected == 0 {
+					g.Table.Matrix[0].Tokens[0].Selected = 1
 				} else {
-					g.Table.matrix[0].Tokens[0].Selected = 3
+					g.Table.Matrix[0].Tokens[0].Selected = 3
 				}
 			}
 		}
 	} else {
 		if len(g.Players[p].Tokens) > 0 {
 			pos := -1
-			for i, v := range g.Table.matrix {
+			for i, v := range g.Table.Matrix {
 				if v.FindSelected() != -1 {
 					pos = i
 				}
 			}
 			if pos != -1 {
-				if g.Table.matrix[pos].Tokens[g.Table.matrix[pos].FindSelected()].Selected == 1 {
-					g.Table.matrix[pos].Tokens[g.Table.matrix[pos].FindSelected()].Selected = 0
+				if g.Table.Matrix[pos].Tokens[g.Table.Matrix[pos].FindSelected()].Selected == 1 {
+					g.Table.Matrix[pos].Tokens[g.Table.Matrix[pos].FindSelected()].Selected = 0
 				} else {
-					g.Table.matrix[pos].Tokens[g.Table.matrix[pos].FindSelected()].Selected = 2
+					g.Table.Matrix[pos].Tokens[g.Table.Matrix[pos].FindSelected()].Selected = 2
 				}
 				if g.Players[p].Tokens[0].Selected == 0 {
 					g.Players[p].Tokens[0].Selected = 1
@@ -127,13 +98,33 @@ func (g *Game) CreateMove(p int) Move {
 			mov.Tokens = append(mov.Tokens, v)
 		}
 	}
-	for _, v := range g.Table.matrix {
+	//Borramos de player
+	g.Players[p].RemoveMove(mov)
+	for _, v := range g.Table.Matrix {
 		for _, h := range v.Tokens {
 			if h.Selected == 2 || h.Selected == 3 {
 				mov.Tokens = append(mov.Tokens, h)
 			}
 		}
 	}
+
+	//Borramos de table
+	for i := 0; i < len(g.Table.Matrix); i++ {
+		for j := 0; j < len(g.Table.Matrix[i].Tokens); j++ {
+			if g.Table.Matrix[i].Tokens[j].Selected == 2 || g.Table.Matrix[i].Tokens[j].Selected == 3 {
+				g.Table.Matrix[i].Tokens = append(g.Table.Matrix[i].Tokens[:j], g.Table.Matrix[i].Tokens[j+1:]...)
+				j = j - 1
+			}
+		}
+	}
+
+	//Borramos los movimientos vacios
+	for i := 0; i < len(g.Table.Matrix); i++ {
+		if len(g.Table.Matrix[i].Tokens) == 0 {
+			g.Table.Matrix = append(g.Table.Matrix[:i], g.Table.Matrix[i+1:]...)
+		}
+	}
+
 	return mov
 }
 
@@ -143,10 +134,10 @@ func (g *Game) SelectToken(p int) {
 		g.Players[p].SelectToken()
 	} else {
 		pos := g.Table.findselected()
-		if g.Table.matrix[pos].Tokens[g.Table.matrix[pos].FindSelected()].Selected == 0 {
-			g.Table.matrix[pos].Tokens[g.Table.matrix[pos].FindSelected()].Selected = 1
-		} else {
-			g.Table.matrix[pos].Tokens[g.Table.matrix[pos].FindSelected()].Selected = 3
+		if g.Table.Matrix[pos].Tokens[g.Table.Matrix[pos].FindSelected()].Selected == 1 {
+			g.Table.Matrix[pos].Tokens[g.Table.Matrix[pos].FindSelected()].Selected = 3
+		} else if g.Table.Matrix[pos].Tokens[g.Table.Matrix[pos].FindSelected()].Selected == 3 {
+			g.Table.Matrix[pos].Tokens[g.Table.Matrix[pos].FindSelected()].Selected = 1
 		}
 	}
 }

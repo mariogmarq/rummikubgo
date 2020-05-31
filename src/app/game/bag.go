@@ -62,31 +62,29 @@ func CreateBag(r *rand.Rand) Bag {
 		bag.Bag = append(bag.Bag, token)
 	}
 
-	r.Shuffle(len(bag.Bag), func(i, j int) {
+	//Shuffle
+	r.Shuffle(len(bag.Bag), func(i, j int) { //fix
 		bag.Bag[i], bag.Bag[j] = bag.Bag[j], bag.Bag[i]
 	})
-
 	return bag
 }
 
 //Extract n Token from bag b, error if n < 0
 func (b *Bag) Extract(n int) ([]Token, error) {
 	var arr []Token
+
 	if n < 0 {
 		return arr, errors.New("Negative integer for extracting from bag")
 	} else if n > len(b.Bag) {
-		n = len(b.Bag)
-	}
-
-	if n == 0 {
+		arr = b.Bag
+		b.Bag = nil
 		return arr, nil
 	}
 
 	for i := 0; i < n; i++ {
 		arr = append(arr, b.Bag[i])
 	}
-
-	b.Bag = b.Bag[n+1 : len(b.Bag)]
+	b.Bag = b.Bag[n:len(b.Bag)]
 
 	return arr, nil
 }

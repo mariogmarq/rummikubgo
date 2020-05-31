@@ -5,14 +5,14 @@
 
 ### Features 
 
-- [ ] You can play the game
+- [x] You can play the game alone :)
 - [ ] You can play the game online
 - [x] Added score of movements
 - [x] Added recognition of the different movements(changing previous movements is not supported yet)
 - [x] Added the ability to do a movement
 - [x] Added player that can hold the tokens
 - [x] Added bag from where you can extract the tokens
-- [ ] Possibility to use keyboard intuitive control(half implemented)
+- [x] Possibility to use keyboard intuitive control
 - [ ] Main menu
-- [ ] Concept of turn
+- [x] Concept of turn
 - [x] Wildcards actually working

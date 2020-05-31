@@ -131,7 +131,10 @@ func (p Player) SearchToken(t Token) int {
 //RemoveMove from hand
 func (p *Player) RemoveMove(m Move) {
 	for _, v := range m.Tokens {
-		p.delete(p.SearchToken(v))
+		pos := p.SearchToken(v)
+		if pos != -1 {
+			p.delete(pos)
+		}
 	}
 }
 
