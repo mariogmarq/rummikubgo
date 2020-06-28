@@ -40,16 +40,24 @@ func main() {
 
 func HandleMatch(con1, con2 net.Conn) {
 	fmt.Println(">> match started")
-	//Firts create the reader for the con1 and the writer for con2
-	reader := bufio.NewReader(con1)
-	writer := bufio.NewWriter(con2)
+	//Firts create the readers and writters for the connections
+	reader1 := bufio.NewReader(con1)
+	reader2 := bufio.NewReader(con2)
+	writer1 := bufio.NewWriter(con2)
+	writer2 := bufio.NewWriter(con2)
 
 	//Now the server will be a simple bridge between the both clients
 	for {
-		netdata, _ := reader.ReadString('\n')
-		fmt.Fprintf(writer, netdata)
+		netdata, _ := reader1.ReadString('\n')
+		fmt.Fprintf(writer2, netdata)
 		if netdata == "STOP\n" {
 			return
 		}
+		netdata, _ := reader2, ReadString('\n')
+		fmt.Fprintf(writer1, netdata)
+		if netdata == "STOP\n" {
+			return
+		}
+
 	}
 }
