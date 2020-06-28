@@ -27,12 +27,12 @@ func main() {
 	for {
 		con1, _ := listener.Accept()
 		w1 := bufio.NewWriter(con1)
-		fmt.Fprintf(w1, "Connected, waiting for second player")
+		fmt.Fprintf(w1, "HOST\n")
 		fmt.Println(">> User connected")
 		con2, _ := listener.Accept()
-		fmt.Fprintf(w1, "Match found!")
+		fmt.Fprintf(w1, "PLAYERFOUND\n")
 		w2 := bufio.NewWriter(con2)
-		fmt.Fprintf(w2, "Host found!")
+		fmt.Fprintf(w2, "GUEST\n")
 		fmt.Println(">> Second user connected")
 		go HandleMatch(con1, con2)
 	}
