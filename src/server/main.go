@@ -53,7 +53,7 @@ func HandleMatch(con1, con2 net.Conn) {
 		if netdata == "STOP\n" {
 			return
 		}
-		netdata, _ := reader2, ReadString('\n')
+		netdata, _ = reader2.ReadString('\n')
 		fmt.Fprintf(writer1, netdata)
 		if netdata == "STOP\n" {
 			return

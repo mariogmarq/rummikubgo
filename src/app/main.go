@@ -1,7 +1,9 @@
 package main
 
 import (
+	"./client"
 	"./game"
+	"bufio"
 	"bytes"
 	"fmt"
 	"math/rand"
@@ -43,17 +45,52 @@ func equal(a, b []byte) bool {
 }
 
 func main() {
+	if len(os.Args) != 2 {
+		fmt.Print("Please pass an ip and port in the call")
+		return
+	}
+
+	//Connect to the server
+	fmt.Printf("Connecting to ", os.Args[1])
+	con, host, err := client.Connect(os.Args[1])
+	lookError(err)
+	writer := bufio.NewWriter(con)
+	reader := bufio.NewReader(con)
+
 	clear()
 	//Create game assets
 	g := game.CreateGame(false)
 	turn := game.CreateGame(false)
 	bag := game.CreateBag(rand.New(rand.NewSource(time.Now().UnixNano())))
 	mov := game.Move{}
+	yourTurn := false
 
-	//Fill player hand
-	Tokens, err := bag.Extract(14)
-	lookError(err)
-	g.Players[0].AddToken(Tokens)
+	//If host create bag and send the other player
+	if host {
+		//Fill player hand
+		Tokens, err := bag.Extract(14)
+		lookError(err)
+		g.Players[0].AddToken(Tokens)
+
+		//Write to the server
+		Tokens, err = bag.Extract(14)
+		s := ""
+		for _, v := range Tokens {
+			s = s + client.TokenToString(v)
+		}
+		s += "\n"
+		fmt.Fprintf(writer, s)
+		_, _ = reader.ReadString('\n')
+		yourTurn = true
+	} else {
+		var tokens []game.Token
+		data, _ := reader.ReadString('\n')
+		for i := 0; i+2 < len(data); i = i + 2 {
+			tokens = append(tokens, client.StringToToken(data[i:i+3]))
+		}
+		g.Players[0].AddToken(tokens)
+		fmt.Fprintf(writer, "Read\n")
+	}
 
 	// disable input buffering
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
@@ -62,56 +99,82 @@ func main() {
 	//Allow us to checked pressed key
 	var b []byte = make([]byte, 1)
 
-	copygame(g, turn, false)
+	copygame(g, turn, false, writer)
 	//game loop
 	for {
-		turn.Print()
-		fmt.Printf("%d  %d", len(turn.Players[0].Tokens), len(bag.Bag))
-		os.Stdin.Read(b)
-		clear()
+		if yourTurn {
+			turn.Print()
+			fmt.Printf("%d", len(turn.Players[0].Tokens))
+			os.Stdin.Read(b)
+			clear()
 
-		if equal(b, right) {
-			turn.ChangeSelected(true, 0)
+			if equal(b, right) {
+				turn.ChangeSelected(true, 0)
 
-		} else if equal(b, left) {
-			turn.ChangeSelected(false, 0)
+			} else if equal(b, left) {
+				turn.ChangeSelected(false, 0)
 
-		} else if equal(b, space) {
-			turn.SelectToken(0)
-		} else if equal(b, enter) {
-			if turn.Table.CheckTable() {
-				if len(turn.Players[0].Tokens) == 0 {
-					clear()
-					fmt.Println("Jugador 0 gana")
-					break
+			} else if equal(b, space) {
+				turn.SelectToken(0)
+			} else if equal(b, enter) {
+				if turn.Table.CheckTable() {
+					if len(turn.Players[0].Tokens) == 0 {
+						clear()
+						fmt.Println("Jugador 0 gana")
+						break
+					}
+					copygame(g, turn, true, writer)
+				} else {
+					turn.Table.Matrix = nil
+					copygame(g, turn, false, writer)
 				}
-				copygame(g, turn, true)
-			} else {
+				yourTurn = false
+			} else if equal(b, draw) {
+				var Tokens []game.Token
+				if host {
+					Tokens, err = bag.Extract(1)
+					lookError(err)
+				} else {
+					fmt.Fprintf(writer, "Draw\n")
+					data, _ := reader.ReadString('\n')
+					token := client.StringToToken(data[0:3])
+					Tokens = append(Tokens, token)
+					fmt.Fprintf(writer, "f\n")
+				}
+				g.Players[0].AddToken(Tokens)
 				turn.Table.Matrix = nil
-				copygame(g, turn, false)
+				copygame(g, turn, false, writer)
+				turn.ResetSelected()
+				yourTurn = false
+			} else if equal(b, jumptotable) {
+				turn.ChangeSection(true, 0)
+			} else if equal(b, jumptoplayer) {
+				turn.ChangeSection(false, 0)
+			} else if equal(b, commit) {
+				mov = turn.CreateMove(0)
+				turn.Table.AddMove(mov)
+				turn.ResetSelected()
 			}
-		} else if equal(b, draw) {
-			Tokens, err := bag.Extract(1)
-			lookError(err)
-			g.Players[0].AddToken(Tokens)
-			turn.Table.Matrix = nil
-			copygame(g, turn, false)
-			turn.ResetSelected()
-		} else if equal(b, jumptotable) {
-			turn.ChangeSection(true, 0)
-		} else if equal(b, jumptoplayer) {
-			turn.ChangeSection(false, 0)
-		} else if equal(b, commit) {
-			mov = turn.CreateMove(0)
-			turn.Table.AddMove(mov)
-			turn.ResetSelected()
-		}
 
+		} else {
+			clear()
+			fmt.Println("Waiting turn")
+			data, _ := reader.ReadString('\n')
+			if data == "Draw\n" {
+				t, _ := bag.Extract(1)
+				fmt.Fprintf(writer, client.TokenToString(t[0])+"\n")
+			} else {
+				data, _ := reader.ReadString('\n')
+				g.Table = client.StringToTable(data)
+				yourTurn = true
+			}
+
+		}
 	}
-	fmt.Println("Fin")
+	fmt.Fprintf(writer, "STOP\n")
 }
 
-func copygame(g1, turn game.Game, valid bool) {
+func copygame(g1, turn game.Game, valid bool, writer *bufio.Writer) {
 	if valid {
 		g1.Table.Matrix = nil
 		for i := 0; i < len(turn.Table.Matrix); i++ {
@@ -136,4 +199,6 @@ func copygame(g1, turn game.Game, valid bool) {
 			}
 		}
 	}
+
+	fmt.Fprintf(writer, client.TableToString(g1.Table))
 }
