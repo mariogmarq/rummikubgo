@@ -9,10 +9,10 @@ import (
 //TokenToString converts a token to a normalized string
 func TokenToString(token game.Token) string {
 	rv := ""
-	if token.Value > 10 {
-		rv = rv + string(token.Value)
+	if token.Value >= 10 {
+		rv = rv + strconv.Itoa(token.Value)
 	} else {
-		rv = rv + "0" + string(token.Value)
+		rv = rv + "0" + strconv.Itoa(token.Value)
 	}
 
 	switch token.Color {

@@ -6,7 +6,7 @@
 ### Features 
 
 - [x] You can play the game alone :)
-- [ ] You can play the game online
+- [x] You can play the game online
 - [x] Added score of movements
 - [x] Added recognition of the different movements(changing previous movements is not supported yet)
 - [x] Added the ability to do a movement

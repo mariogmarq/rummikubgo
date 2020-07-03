@@ -26,35 +26,31 @@ func main() {
 	//Will get two connections and handle them, the purpose of the server is being concurrent
 	for {
 		con1, _ := listener.Accept()
-		w1 := bufio.NewWriter(con1)
-		fmt.Fprintf(w1, "HOST\n")
+		fmt.Fprintf(con1, "HOST\n")
 		fmt.Println(">> User connected")
 		con2, _ := listener.Accept()
-		fmt.Fprintf(w1, "PLAYERFOUND\n")
-		w2 := bufio.NewWriter(con2)
-		fmt.Fprintf(w2, "GUEST\n")
+		fmt.Fprintf(con1, "PLAYERFOUND\n")
+		fmt.Fprintf(con2, "GUEST\n")
 		fmt.Println(">> Second user connected")
-		go HandleMatch(con1, con2)
+		go handleMatch(con1, con2)
 	}
 }
 
-func HandleMatch(con1, con2 net.Conn) {
+func handleMatch(con1, con2 net.Conn) {
 	fmt.Println(">> match started")
 	//Firts create the readers and writters for the connections
 	reader1 := bufio.NewReader(con1)
 	reader2 := bufio.NewReader(con2)
-	writer1 := bufio.NewWriter(con2)
-	writer2 := bufio.NewWriter(con2)
 
 	//Now the server will be a simple bridge between the both clients
 	for {
 		netdata, _ := reader1.ReadString('\n')
-		fmt.Fprintf(writer2, netdata)
+		fmt.Fprintf(con2, netdata)
 		if netdata == "STOP\n" {
 			return
 		}
 		netdata, _ = reader2.ReadString('\n')
-		fmt.Fprintf(writer1, netdata)
+		fmt.Fprintf(con1, netdata)
 		if netdata == "STOP\n" {
 			return
 		}
